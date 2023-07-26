@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="jimsss-terminal:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/jimsss_terminal_jar</output-path>
+    <root id="archive" name="jimsss-terminal.jar">
+      <element id="module-output" name="jimsss-terminal" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/dom4j/dom4j/1.6.1/dom4j-1.6.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/xml-apis/xml-apis/1.0.b2/xml-apis-1.0.b2.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
