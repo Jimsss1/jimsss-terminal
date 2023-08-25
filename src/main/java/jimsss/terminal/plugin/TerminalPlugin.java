@@ -1,6 +1,7 @@
 package jimsss.terminal.plugin;
 
 public interface TerminalPlugin {
+    @Deprecated
     String getPluginName();
 
     void load();

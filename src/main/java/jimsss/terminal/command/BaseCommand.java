@@ -4,99 +4,100 @@ import jimsss.terminal.Main;
 import jimsss.terminal.MetaData;
 import jimsss.terminal.i18n.I18n;
 import jimsss.terminal.plugin.*;
-import org.dom4j.DocumentException;
 
+import cn.hutool.core.lang.Console;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
-import java.util.Collection;
 import java.util.List;
 
 public class BaseCommand {
     private static final String baseCommandHelp = I18n.getString("command.help");
 
     public static void runBaseCommand(String[] input)
-            throws DocumentException, MalformedURLException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+            throws IOException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
         if (input.length != 1) {
             switch (input[1]) {
+                case "debug" -> BaseCommand.debugMode();
                 case "help" -> BaseCommand.getHelp();
                 case "version" -> BaseCommand.getVersion();
                 case "exit" -> BaseCommand.exit();
                 case "plugins" -> BaseCommand.getPlugins();
                 case "reload" -> BaseCommand.reloadPlugin(input);
                 case "unload" -> BaseCommand.unloadPlugin(input);
-                default -> BaseCommand.noCommand();
             }
         }
     }
 
-    public static void noCommand() {
-        System.out.println(I18n.getString("command.base_no_command"));
+    public static void debugMode() {
+        MetaData.DEBUG_MODE = true;
     }
 
     public static void getHelp() {
-        System.out.println(baseCommandHelp);
+        Console.log(baseCommandHelp);
     }
 
     public static void getVersion() {
-        System.out.println("JimsssTerminal " + I18n.getString("command_version") + ":" + MetaData.VERSION);
+        Console.log("JimsssTerminal " + I18n.getString("command_version") + ":" + MetaData.VERSION);
     }
 
     public static void exit()
-            throws MalformedURLException, DocumentException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
-        PluginUtil.plugin(MethodName.UNLOAD);
+            throws MalformedURLException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+        Main.pluginMap = PluginUtil.plugin(MethodName.UNLOAD);
         System.exit(0);
     }
 
-    public static void getPlugins()
-            throws DocumentException, MalformedURLException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
-        List<Plugin> pluginList = XMLParser.getPluginList();
-        System.out.print(I18n.getString("command.plugin.list.one") + ":");
+    public static void getPlugins() {
+        List<Plugin> pluginList = PluginManager.listPlugin();
+        Console.print(I18n.getString("command.plugin.list.one"));
         int i = 0;
         for (; i < pluginList.size(); i++) {
-            System.out.println(pluginList.get(i).getPluginName() + " ");
+            Console.log(pluginList.get(i).getPluginName() + " ");
         }
-        System.out.println("\n" + I18n.getFormatString("command.plugin.list.two", i));
+        Console.log("\n" + I18n.getFormatString("command.plugin.list.two", i));
     }
 
     public static void reloadPlugin(String[] input)
-            throws MalformedURLException, DocumentException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+            throws MalformedURLException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
         if (input.length == 3) {
-            TerminalPlugin terminalPlugin = getTerminalPlugin(input);
+            String pluginName = input[2];
+            TerminalPlugin terminalPlugin = getTerminalPlugin(pluginName);
             if (terminalPlugin != null) {
+                if (!Main.pluginMap.containsKey(pluginName)) {
+                    Main.pluginMap.put(pluginName, terminalPlugin);
+                }
                 terminalPlugin.reload();
             } else {
-                System.out.println(I18n.getString("command.plugin.plugin_name_invalid"));
+                Console.log(I18n.getString("command.plugin.plugin_name_invalid"));
             }
         } else {
-            System.out.println(I18n.getString("command.invalid"));
+            Console.log(I18n.getString("command.invalid"));
         }
     }
 
     public static void unloadPlugin(String[] input)
-            throws MalformedURLException, DocumentException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+            throws MalformedURLException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
         if (input.length == 3) {
-            TerminalPlugin terminalPlugin = getTerminalPlugin(input);
-            Collection<TerminalPlugin> terminalPluginCollection = Main.pluginMap.values();
-            while (terminalPluginCollection.contains(terminalPlugin)) {
-                terminalPluginCollection.remove(terminalPlugin);
+            String pluginName = input[2];
+            TerminalPlugin terminalPlugin = getTerminalPlugin(pluginName);
+            if (terminalPlugin == null) {
+                Console.log(I18n.getString("command.plugin.plugin_name_invalid"));
+                return;
             }
-            if (terminalPlugin != null) {
-                terminalPlugin.unload();
-            } else {
-                System.out.println(I18n.getString("command.plugin.plugin_name_invalid"));
-            }
+            terminalPlugin.unload();
+            Main.pluginMap.remove(pluginName);
         } else {
-            System.out.println(I18n.getString("command.invalid"));
+            Console.log(I18n.getString("command.invalid"));
         }
     }
 
-    public static TerminalPlugin getTerminalPlugin(String[] input)
-            throws DocumentException, MalformedURLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        List<Plugin> pluginList = XMLParser.getPluginList();
+    public static TerminalPlugin getTerminalPlugin(String pluginName)
+            throws MalformedURLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        List<Plugin> pluginList = PluginManager.listPlugin();
         PluginManager pluginManager = new PluginManager(pluginList);
         String className = "";
         for (Plugin plugin : pluginList) {
-            if (plugin.getPluginName().equals(input[2])) {
+            if (plugin.getPluginName().equals(pluginName)) {
                 className = plugin.getClassName();
                 break;
             }

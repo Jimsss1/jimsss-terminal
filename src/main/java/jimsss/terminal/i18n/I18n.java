@@ -2,9 +2,9 @@ package jimsss.terminal.i18n;
 
 import jimsss.terminal.MetaData;
 
-import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.text.MessageFormat;
 
 public class I18n {
     public static Locale locale = new Locale(MetaData.LANGUAGE, MetaData.COUNTRY);

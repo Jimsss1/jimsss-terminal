@@ -5,8 +5,8 @@ import lombok.Data;
 @Data
 public class Plugin {
     private String pluginName;
-    private String jarPath;
     private String className;
+    private String jarPath;
 
     public Plugin() {
     }
@@ -16,7 +16,7 @@ public class Plugin {
         this.className = className;
     }
 
-    public Plugin(String pluginName, String jarPath, String className) {
+    public Plugin(String pluginName, String className, String jarPath) {
         this.pluginName = pluginName;
         this.jarPath = jarPath;
         this.className = className;
