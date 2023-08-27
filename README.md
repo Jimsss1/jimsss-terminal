@@ -24,3 +24,4 @@ public String getPluginName() {
 - reload():终端输入 B reload 你的插件名称 时执行,重新加载
 - unload():终端输入 B unload 你的插件名称 时执行,卸载插件
 - runCommand(String[] input):input的第0个元素和插件名称相符时执行,input为终端读取输入内容去除前后空格后分割后的数组
+# 这玩意支持国际化!
